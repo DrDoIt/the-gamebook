@@ -21,10 +21,17 @@ class Player:
 
 class Enemy:
 
-    # name : [type, attack, hp, ability]
+    # id : [name, type, attack, hp, ability]
     enemies = {
-        'witch' : ['unique', 10, 50, None]
+        0 : ['witch', 'unique', 10, 50, None]
     }
+
+
+def battle(enemy):
+    print(f'You attack the {enemy[0]}')
+    enemy[3] -= Player.attack
+    print(f'You did {Player.attack} damage to the {enemy[0]}')
+    print(enemy)
 
 
 def intro_machine():
@@ -129,10 +136,17 @@ The options are:
     elif page == 5:
         page = int(input(dd('''
             You have chased down the witch.
+            Battle her, or run?
 
-            5> yes
-            2> no, return to Gooberton         
+            6> battle her
+            7> no, run back to Gooberton         
             ''')))
+    elif page == 6:
+        battle(Enemy.enemies[0])
+        if Player.hp > 0:
+            page = 6
+        else:
+            page = 1
     return page
         
 
