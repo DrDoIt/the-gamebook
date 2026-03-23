@@ -3,6 +3,7 @@ import time
 import random
 
 running = True
+text_speed = 4
 
 class Player:
     # stats
@@ -20,6 +21,13 @@ class Player:
         'green stone' : ['This stone can be combined with other stones to become more powerful', 5, 'none', 60],
         'red stone' : ['This stone can be combined with other stones to become more powerful', 7, 'none', 70],
         }
+    
+    craftable_items = {
+        'Eclogite' : ['This stone can be combined with other stones to become more powerful', 15, 'regenerate', 200],
+        }
+
+    visited_pages = []
+
 
 class Enemy:
     # id : [name, type, attack, hp, ability]
@@ -27,41 +35,60 @@ class Enemy:
         0 : ['witch', 'unique', 10, 50, None]
     }
 
+# currently working on crafting, doesnt print craftables correctly
+def crafting():
+    combos = [('green stone', 'red stone')]
+    craftable = []
+    for combo in combos:
+        if combo[0] in Player.inventory and combo[1] in Player.inventory:
+            craftable.append(Player.craftable_items.keys())
+    if len(craftable) > 0:
+        print("What would you like to craft?")
+        for craft in craftable:
+            print(craft)
+
+def show_score():
+    score = Player.xp + Player.hp + Player.gold + len(Player.inventory)
+    print(f'Your score: {score}')
+
+
 def show_inventory(inventory):
     for index, inventory_item in enumerate(inventory,1):
         print(f'{index}> {inventory_item}')
     # for index, item in enumerate(inventory,1):
     #     print(f'{index}> {item}')
 
+
 def battle(enemy):
     battling = True
+    global text_speed
     print('\nWould you like to equip any of the following?\n')
     show_inventory(Player.inventory)
     equipped = int(input())
     if len(Player.inventory) > 0:
         item_name = Player.inventory[equipped-1]
         player_bonus_dmg = Player.possible_player_inventory[item_name][1]
-        print(f'bonus dmg = {player_bonus_dmg}')
+        print(f'\nbonus dmg = {player_bonus_dmg}\n')
 
     while battling and Player.hp > 0 and enemy[3] > 0:
         # Player attack
         player_roll = random.randrange(1,7)
-        print(f'You attack the {enemy[0]}')
+        print(f'You attacked the {enemy[0]}')
         player_damage = Player.attack + player_roll + player_bonus_dmg
         enemy[3] -= player_damage
-        print(f'You did {player_damage} damage to the {enemy[0]}')
-        print(enemy)
-        time.sleep(3)
+        print(f'You did {player_damage} damage to the {enemy[0]}\n')
+        # print(f"The enemy's hp {enemy[3]}")
+        time.sleep(text_speed)
 
-        if Player.hp > 0:
+        if Player.hp > 0 and enemy[3] > 0:
             # Enemy attack
             enemy_roll = random.randrange(1,7)
             print(f'The {enemy[0]} attacks you!')
             enemy_damage = enemy[2] + enemy_roll
             Player.hp -= enemy_damage
-            print(f'The {enemy[0]} did {enemy_damage} damage to you')
-            print(Player.hp)
-            time.sleep(3)
+            print(f'The {enemy[0]} did {enemy_damage} damage to you\n')
+            # print(f'Your HP {Player.hp}')
+            time.sleep(text_speed)
 
 
 def intro_machine():
@@ -126,12 +153,14 @@ def adventuring(page):
 
     if page == 1:
         page = print(died_message)
+        running = False
     elif page == 2:
         page = int(input(dd('''
             You arrived at the village of Gooberton.
                              
             3> Shop for gear 
-            4> Leave to return to Woodsbury            
+            4> Leave to return to Woodsbury
+            8> Craft            
             ''')))
     elif page == 3:
         choice = int(input(dd(f'''
@@ -175,16 +204,30 @@ The options are:
     elif page == 6:
         battle(Enemy.enemies[0])
         if Player.hp > 0:
+            Player.xp += 200
             page = 7
+
         else:
             page = 1
     elif page == 7:
-        page = int(input(dd('''
+        print(dd('''
             You have defeated the witch! congratulations!         
-            ''')))
+            '''))
+        running = False
+    elif page == 8:
+        crafting()
+        page = 9
+    elif page == 8:
+        print('yo')
     return page
         
 
 page = intro_machine()
+
 while running:
     page = adventuring(page)
+    if page not in Player.visited_pages:
+        Player.visited_pages.append(page)
+        Player.xp += 1
+
+show_score()
