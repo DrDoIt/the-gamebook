@@ -1,4 +1,6 @@
 import textwrap as text
+import time
+import random
 
 running = True
 
@@ -7,7 +9,7 @@ class Player:
     name: str = ''
     xp: int = 0
     hp: int = 100
-    attack: int = 5
+    attack: int = 10
     luck: int = 3
     gold: int = 200
 
@@ -15,23 +17,51 @@ class Player:
 
     # name : [description, power, ability, value]
     possible_player_inventory = {
-        'green stone' : ['This stone can be combined with other stones to become more powerful', 1, 'none', 60],
-        'red stone' : ['This stone can be combined with other stones to become more powerful', 1, 'none', 70],
+        'green stone' : ['This stone can be combined with other stones to become more powerful', 5, 'none', 60],
+        'red stone' : ['This stone can be combined with other stones to become more powerful', 7, 'none', 70],
         }
 
 class Enemy:
-
     # id : [name, type, attack, hp, ability]
     enemies = {
         0 : ['witch', 'unique', 10, 50, None]
     }
 
+def show_inventory(inventory):
+    for index, inventory_item in enumerate(inventory,1):
+        print(f'{index}> {inventory_item}')
+    # for index, item in enumerate(inventory,1):
+    #     print(f'{index}> {item}')
 
 def battle(enemy):
-    print(f'You attack the {enemy[0]}')
-    enemy[3] -= Player.attack
-    print(f'You did {Player.attack} damage to the {enemy[0]}')
-    print(enemy)
+    battling = True
+    print('\nWould you like to equip any of the following?\n')
+    show_inventory(Player.inventory)
+    equipped = int(input())
+    if len(Player.inventory) > 0:
+        item_name = Player.inventory[equipped-1]
+        player_bonus_dmg = Player.possible_player_inventory[item_name][1]
+        print(f'bonus dmg = {player_bonus_dmg}')
+
+    while battling and Player.hp > 0 and enemy[3] > 0:
+        # Player attack
+        player_roll = random.randrange(1,7)
+        print(f'You attack the {enemy[0]}')
+        player_damage = Player.attack + player_roll + player_bonus_dmg
+        enemy[3] -= player_damage
+        print(f'You did {player_damage} damage to the {enemy[0]}')
+        print(enemy)
+        time.sleep(3)
+
+        if Player.hp > 0:
+            # Enemy attack
+            enemy_roll = random.randrange(1,7)
+            print(f'The {enemy[0]} attacks you!')
+            enemy_damage = enemy[2] + enemy_roll
+            Player.hp -= enemy_damage
+            print(f'The {enemy[0]} did {enemy_damage} damage to you')
+            print(Player.hp)
+            time.sleep(3)
 
 
 def intro_machine():
@@ -120,6 +150,7 @@ The options are:
                 page = 2
             else:
                 Player.gold -= Player.possible_player_inventory[item_name][3]
+                Player.inventory.append(item_name)
                 print(dd(f'''
                       You sucessfully bought a {item_name}!
                       New gold balance: {Player.gold}
@@ -144,9 +175,13 @@ The options are:
     elif page == 6:
         battle(Enemy.enemies[0])
         if Player.hp > 0:
-            page = 6
+            page = 7
         else:
             page = 1
+    elif page == 7:
+        page = int(input(dd('''
+            You have defeated the witch! congratulations!         
+            ''')))
     return page
         
 
