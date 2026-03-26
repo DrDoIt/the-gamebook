@@ -35,17 +35,24 @@ class Enemy:
         0 : ['witch', 'unique', 10, 50, None]
     }
 
+
 # currently working on crafting, doesnt print craftables correctly
 def crafting():
+    global page
     combos = [('green stone', 'red stone')]
     craftable = []
     for combo in combos:
         if combo[0] in Player.inventory and combo[1] in Player.inventory:
             craftable.append(Player.craftable_items.keys())
+        else:
+            pass
     if len(craftable) > 0:
         print("What would you like to craft?")
         for craft in craftable:
             print(craft)
+    else:
+        print('nothing craftable')
+
 
 def show_score():
     score = Player.xp + Player.hp + Player.gold + len(Player.inventory)
@@ -216,6 +223,7 @@ The options are:
         running = False
     elif page == 8:
         crafting()
+        page = 2
         page = 9
     elif page == 8:
         print('yo')
